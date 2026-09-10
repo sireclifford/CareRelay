@@ -19,6 +19,9 @@ jobs:
         with:
           xcode-version: latest-stable
 
+      - name: List available destinations
+        run: xcodebuild -showdestinations -project CareRelay.xcodeproj -scheme CareRelay
+
       - name: Install SwiftLint
         run: brew install swiftlint
 
