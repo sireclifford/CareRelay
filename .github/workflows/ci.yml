@@ -19,6 +19,9 @@ jobs:
         with:
           xcode-version: latest-stable
 
+      - name: Download iOS Simulator runtime
+        run: xcodebuild -downloadPlatform iOS
+
       - name: List available destinations
         run: xcodebuild -showdestinations -project CareRelay.xcodeproj -scheme CareRelay
 
