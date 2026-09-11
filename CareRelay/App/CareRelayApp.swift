@@ -6,7 +6,10 @@ struct CareRelayApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Unit.self,
-            Staff.self
+            Staff.self,
+            Resident.self,
+            Entry.self,
+            ReadReceipt.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
