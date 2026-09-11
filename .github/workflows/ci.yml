@@ -22,33 +22,6 @@ jobs:
       - name: Download iOS Simulator runtime
         run: xcodebuild -downloadPlatform iOS
 
-      - name: Create iOS Simulator device
-        run: |
-          RUNTIME_JSON=$(xcrun simctl list runtimes -j)
-          RUNTIME_ID=$(echo "$RUNTIME_JSON" | python3 -c "import json,sys; d=json.load(sys.stdin); print(next(r['identifier'] for r in d['runtimes'] if r['platform']=='iOS'))")
-          DEVICETYPE_ID=$(echo "$RUNTIME_JSON" | python3 -c "
-          import json, sys
-          d = json.load(sys.stdin)
-          rt = next(r for r in d['runtimes'] if r['platform'] == 'iOS')
-          print(next(t['identifier'] for t in rt['supportedDeviceTypes'] if 'iPad' in t['name']))
-          ")
-          DEVICE_UDID=$(xcrun simctl create "CI iPad" "$DEVICETYPE_ID" "$RUNTIME_ID")
-          echo "Created device $DEVICE_UDID using $DEVICETYPE_ID / $RUNTIME_ID"
-          echo "DEVICE_UDID=$DEVICE_UDID" >> "$GITHUB_ENV"
-
-      - name: Boot simulator device
-        run: |
-          xcrun simctl boot "$DEVICE_UDID"
-          xcrun simctl bootstatus "$DEVICE_UDID" -b
-
-      - name: Verify simulator device
-        run: |
-          echo "Full device list:"
-          xcrun simctl list devices
-          echo "---"
-          echo "Our device:"
-          xcrun simctl list devices | grep "$DEVICE_UDID" || echo "NOT FOUND in device list"
-
       - name: List available destinations
         run: xcodebuild -showdestinations -project CareRelay.xcodeproj -scheme CareRelay
 
@@ -67,4 +40,4 @@ jobs:
           xcodebuild test
           -project CareRelay.xcodeproj
           -scheme CareRelay
-          -destination "platform=iOS Simulator,id=$DEVICE_UDID"
+          -destination "platform=iOS Simulator,name=iPad (10th generation),OS=18.3.1"
