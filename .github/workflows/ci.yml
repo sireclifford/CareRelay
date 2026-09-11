@@ -36,6 +36,14 @@ jobs:
           echo "Created device $DEVICE_UDID using $DEVICETYPE_ID / $RUNTIME_ID"
           echo "DEVICE_UDID=$DEVICE_UDID" >> "$GITHUB_ENV"
 
+      - name: Verify simulator device
+        run: |
+          echo "Full device list:"
+          xcrun simctl list devices
+          echo "---"
+          echo "Our device:"
+          xcrun simctl list devices | grep "$DEVICE_UDID" || echo "NOT FOUND in device list"
+
       - name: List available destinations
         run: xcodebuild -showdestinations -project CareRelay.xcodeproj -scheme CareRelay
 
