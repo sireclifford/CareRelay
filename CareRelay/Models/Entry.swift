@@ -41,7 +41,16 @@ final class Entry {
     var resolvedBy: Staff?
     var resolvedAt: Date?
     
-    init(id: UUID, kind: EntryKind, unit: Unit? = nil, resident: Resident? = nil, category: EntryCategory, body: String, author: Staff?, createdAt: Date) {
+    init(
+        id: UUID = UUID(),
+        kind: EntryKind,
+        unit: Unit? = nil,
+        resident: Resident? = nil,
+        category: EntryCategory,
+        body: String,
+        author: Staff?,
+        createdAt: Date = Date()
+    ) {
         self.id = id
         self.kind = kind
         self.unit = unit
