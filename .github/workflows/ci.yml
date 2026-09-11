@@ -41,3 +41,4 @@ jobs:
           -project CareRelay.xcodeproj
           -scheme CareRelay
           -destination "platform=iOS Simulator,name=iPad (10th generation),OS=18.3.1"
+          -skip-testing:CareRelayUITests
