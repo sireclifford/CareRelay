@@ -22,6 +22,9 @@ jobs:
       - name: Download iOS Simulator runtime
         run: xcodebuild -downloadPlatform iOS
 
+      - name: Run first launch (provision default simulators)
+        run: xcodebuild -runFirstLaunch
+
       - name: List available destinations
         run: xcodebuild -showdestinations -project CareRelay.xcodeproj -scheme CareRelay
 
