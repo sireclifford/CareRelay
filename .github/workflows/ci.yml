@@ -60,7 +60,7 @@ jobs:
           xcodebuild build
           -project CareRelay.xcodeproj
           -scheme CareRelay
-          -destination "platform=iOS Simulator,id=$DEVICE_UDID"
+          -destination "generic/platform=iOS Simulator"
 
       - name: Test
         run: >
