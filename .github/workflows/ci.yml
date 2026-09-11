@@ -22,8 +22,13 @@ jobs:
       - name: Download iOS Simulator runtime
         run: xcodebuild -downloadPlatform iOS
 
-      - name: Run first launch (provision default simulators)
-        run: xcodebuild -runFirstLaunch
+      - name: Create iOS Simulator device
+        run: |
+          RUNTIME_ID=$(xcrun simctl list runtimes -j | python3 -c "import json,sys; d=json.load(sys.stdin); print(next(r['identifier'] for r in d['runtimes'] if r['platform']=='iOS'))")
+          DEVICETYPE_ID=$(xcrun simctl list devicetypes -j | python3 -c "import json,sys; d=json.load(sys.stdin); print(next(t['identifier'] for t in d['devicetypes'] if 'iPad' in t['name']))")
+          DEVICE_UDID=$(xcrun simctl create "CI iPad" "$DEVICETYPE_ID" "$RUNTIME_ID")
+          echo "Created device $DEVICE_UDID using $DEVICETYPE_ID / $RUNTIME_ID"
+          echo "DEVICE_UDID=$DEVICE_UDID" >> "$GITHUB_ENV"
 
       - name: List available destinations
         run: xcodebuild -showdestinations -project CareRelay.xcodeproj -scheme CareRelay
@@ -36,11 +41,11 @@ jobs:
           xcodebuild build
           -project CareRelay.xcodeproj
           -scheme CareRelay
-          -destination 'platform=iOS Simulator,name=iPad (10th generation)'
+          -destination "platform=iOS Simulator,id=$DEVICE_UDID"
 
       - name: Test
         run: >
           xcodebuild test
           -project CareRelay.xcodeproj
           -scheme CareRelay
-          -destination 'platform=iOS Simulator,name=iPad (10th generation)'
+          -destination "platform=iOS Simulator,id=$DEVICE_UDIT"
