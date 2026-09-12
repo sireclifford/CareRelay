@@ -1,23 +1,85 @@
+# ==============================================================================
+# SwiftLint Configuration File for CareRelay
+# ==============================================================================
+
+# Directories to include during linting
 included:
   - CareRelay
 
+# Directories to ignore during linting
 excluded:
   - CareRelay/Preview Content
+  - Pods
+  - Carthage
+  - .build
+  - DerivedData
 
+# ==============================================================================
+# Rules Configuration
+# ==============================================================================
+
+# Disabled rules that are often too strict or conflict with SwiftUI
+disabled_rules:
+  - trailing_whitespace                  # Can be annoying if your IDE doesn't auto-trim
+  - function_body_length                 # Often broken by complex SwiftUI Views
+
+# Extra rules to opt-into for safer, cleaner code
 opt_in_rules:
-  - empty_count
-  - closure_spacing
-  - force_unwrapping
+  - empty_count                          # Use .isEmpty instead of .count == 0
+  - closure_spacing                      # Enforces { closure } spacing
+  - force_unwrapping                     # Warns against using forced unwrapping (!)
+  - convenience_type                     # Encourages enums over structs for static utilities
+  - discouraged_optional_collection      # Warns against [T]?, prefer empty array []
+  - fatal_error_message                  # Forces descriptive text in fatalError()
+  - implicit_return                      # Removes 'return' in single-line SwiftUI expressions
+  - legacy_multiple                      # Enforces .isMultiple(of:) over % operator
+  - toggle_bool                          # Encourages .toggle() over bool = !bool
+  - unused_import                        # Clean up redundant import statements
 
+# ==============================================================================
+# Rule Customizations
+# ==============================================================================
+
+# Force Cast & Try should break the build, not just warn
 force_cast: error
 force_try: error
 
+# Line length constraints optimized for modern displays
 line_length:
   warning: 120
   error: 150
+  ignores_urls: true                     # Don't trigger errors for long links
+  ignores_comments: true                 # Don't trigger errors for documentation
 
+# File length limitations
+file_length:
+  warning: 500
+  error: 1000
+
+# Naming conventions customization
 identifier_name:
   min_length:
     warning: 2
-  excluded:
+  max_length:
+    warning: 40
+    error: 60
+  excluded:                              # Allowed short variable names
     - id
+    - id_
+    - x
+    - y
+    - z
+    - i
+    - j
+
+# Type naming length constraints
+type_name:
+  min_length: 3
+  max_length:
+    warning: 40
+    error: 50
+
+# Function body and parameter constraints
+function_parameter_count:
+  warning: 5
+  error: 8
