@@ -2,7 +2,7 @@ import SwiftUI
 
 struct EntryRow: View {
     let entry: Entry
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
@@ -19,7 +19,7 @@ struct EntryRow: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            Text(entry.body)
+            Text(entry.content)
                 .font(.body)
                 .lineLimit(2)
             Text(entry.author?.name ?? "Unknown")

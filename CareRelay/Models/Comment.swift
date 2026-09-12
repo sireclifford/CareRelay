@@ -8,8 +8,8 @@ final class Comment {
     var author: Staff?
     var body: String = ""
     var timestamp: Date = Date()
-    
-    init(id: UUID = UUID(), entry: Entry?, author: Staff?, body: String, timestamp: Date = Date()){
+
+    init(id: UUID = UUID(), entry: Entry?, author: Staff?, body: String, timestamp: Date = Date()) {
         self.id = id
         self.entry = entry
         self.author = author

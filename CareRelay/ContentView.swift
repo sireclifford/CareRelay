@@ -3,8 +3,20 @@ import SwiftData
 
 struct ContentView: View {
     var body: some View {
-        NavigationStack {
-            FeedView()
+        TabView {
+            NavigationStack {
+                FeedView()
+            }
+            .tabItem {
+                Label("Feed", systemImage: "list.bullet")
+            }
+
+            NavigationStack {
+                RosterView()
+            }
+            .tabItem {
+                Label("Roster", systemImage: "person.3")
+            }
         }
     }
 }

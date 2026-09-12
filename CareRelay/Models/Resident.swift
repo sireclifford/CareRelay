@@ -8,7 +8,7 @@ final class Resident {
     var unit: Unit?
     @Relationship(deleteRule: .nullify, inverse: \Entry.resident)
     var entries: [Entry]? = []
-    
+
     init(id: UUID = UUID(), name: String, unit: Unit? = nil) {
         self.id = id
         self.name = name

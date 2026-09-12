@@ -19,7 +19,6 @@ enum AlertStatus: String, Codable, CaseIterable {
     case resolved
 }
 
-
 @Model
 final class Entry {
     var id: UUID = UUID()
@@ -27,27 +26,27 @@ final class Entry {
     var unit: Unit?
     var resident: Resident?
     var category: EntryCategory = EntryCategory.other
-    var body: String = ""
+    var content: String = ""
     var author: Staff?
     var createdAt: Date = Date()
-    
+
     @Relationship(deleteRule: .cascade, inverse: \ReadReceipt.entry)
     var readReceipts: [ReadReceipt]? = []
-    
+
     @Relationship(deleteRule: .cascade, inverse: \Comment.entry)
     var comments: [Comment]? = []
-    
+
     var status: AlertStatus?
     var resolvedBy: Staff?
     var resolvedAt: Date?
-    
+
     init(
         id: UUID = UUID(),
         kind: EntryKind,
         unit: Unit? = nil,
         resident: Resident? = nil,
         category: EntryCategory,
-        body: String,
+        content: String,
         author: Staff?,
         createdAt: Date = Date()
     ) {
@@ -56,7 +55,7 @@ final class Entry {
         self.unit = unit
         self.resident = resident
         self.category = category
-        self.body = body
+        self.content = content
         self.author = author
         self.createdAt = createdAt
         self.status = kind == .alert ? .open : nil
