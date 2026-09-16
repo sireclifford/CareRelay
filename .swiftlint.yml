@@ -29,12 +29,10 @@ opt_in_rules:
   - closure_spacing                      # Enforces { closure } spacing
   - force_unwrapping                     # Warns against using forced unwrapping (!)
   - convenience_type                     # Encourages enums over structs for static utilities
-  - discouraged_optional_collection      # Warns against [T]?, prefer empty array []
   - fatal_error_message                  # Forces descriptive text in fatalError()
   - implicit_return                      # Removes 'return' in single-line SwiftUI expressions
   - legacy_multiple                      # Enforces .isMultiple(of:) over % operator
   - toggle_bool                          # Encourages .toggle() over bool = !bool
-  - unused_import                        # Clean up redundant import statements
 
 # ==============================================================================
 # Rule Customizations
@@ -83,3 +81,6 @@ type_name:
 function_parameter_count:
   warning: 5
   error: 8
+
+analyzer_rules:
+  - unused_import                        # Clean up redundant import statements
