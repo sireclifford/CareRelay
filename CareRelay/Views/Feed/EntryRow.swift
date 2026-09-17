@@ -3,15 +3,6 @@ import SwiftUI
 struct EntryRow: View {
     let entry: Entry
 
-    private var contextLine: String {
-        var parts: [String] = []
-        if let resident = entry.resident {
-            parts.append(resident.name)
-        }
-        parts.append(entry.unit?.name ?? "Facility-wide")
-        return parts.joined(separator: " · ")
-    }
-
     private var isOpenAlert: Bool {
         entry.kind == .alert && entry.status == .open
     }
@@ -66,13 +57,15 @@ struct EntryRow: View {
                     .lineLimit(2)
 
                 HStack(spacing: 12) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "mappin.and.ellipse")
-                        Text(contextLine)
+                    if let resident = entry.resident {
+                        HStack(spacing: 4) {
+                            Image(systemName: "person.fill")
+                            Text(resident.name)
+                        }
                     }
                     HStack(spacing: 4) {
-                        Image(systemName: "person.fill")
-                        Text(entry.author?.name ?? "Unknown")
+                        Image(systemName: "building.2.fill")
+                        Text(entry.unit?.name ?? "Facility-wide")
                     }
                 }
                 .font(.caption)

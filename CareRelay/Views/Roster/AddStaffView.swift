@@ -11,11 +11,18 @@ struct AddStaffView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Name", text: $name)
-                Picker("Role", selection: $role) {
-                    ForEach(StaffRole.allCases, id: \.self) { role in
-                        Text(role.displayName).tag(role)
+                Section {
+                    TextField("Name", text: $name)
+                }
+
+                Section {
+                    Picker("Role", selection: $role) {
+                        ForEach(StaffRole.allCases, id: \.self) { role in
+                            Text(role.displayName).tag(role)
+                        }
                     }
+                } footer: {
+                    Text("Nurse in Charge and Supervisor can resolve open Alerts. Caregiver cannot.")
                 }
             }
             .navigationTitle("New Staff")

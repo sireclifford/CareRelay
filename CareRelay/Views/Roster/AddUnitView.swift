@@ -10,7 +10,11 @@ struct AddUnitView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Unit name", text: $name)
+                Section {
+                    TextField("Unit name", text: $name)
+                } footer: {
+                    Text("This is the name staff will see when assigning an entry or resident to a unit.")
+                }
             }
             .navigationTitle("New Unit")
             .toolbar {

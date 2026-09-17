@@ -13,12 +13,19 @@ struct AddResidentView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Name", text: $name)
-                Picker("Unit", selection: $selectedUnit) {
-                    Text("Select unit").tag(Unit?.none)
-                    ForEach(units) { unit in
-                        Text(unit.name).tag(Unit?.some(unit))
+                Section {
+                    TextField("Name", text: $name)
+                }
+
+                Section {
+                    Picker("Unit", selection: $selectedUnit) {
+                        Text("Select unit").tag(Unit?.none)
+                        ForEach(units) { unit in
+                            Text(unit.name).tag(Unit?.some(unit))
+                        }
                     }
+                } footer: {
+                    Text("Every resident must belong to a unit.")
                 }
             }
             .navigationTitle("New Resident")

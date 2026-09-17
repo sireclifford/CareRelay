@@ -41,6 +41,12 @@ final class Staff {
 
     @Relationship(deleteRule: .nullify, inverse: \Comment.author)
     var comments: [Comment]? = []
+    
+    var initials: String {
+        let parts = name.split(separator: " ")
+        let letters = parts.prefix(2).compactMap { $0.first }
+        return String(letters).uppercased()
+    }
 
     init(id: UUID = UUID(), name: String, role: StaffRole) {
         self.id = id
