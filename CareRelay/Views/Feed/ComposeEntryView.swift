@@ -4,17 +4,16 @@ import SwiftData
 struct ComposeEntryView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(Session.self) private var session
 
     @Query private var units: [Unit]
     @Query private var residents: [Resident]
-    @Query private var staffMembers: [Staff]
 
     @State private var kind: EntryKind = .notice
     @State private var selectedUnit: Unit?
     @State private var selectedResident: Resident?
     @State private var category: EntryCategory = .other
     @State private var content: String = ""
-    @State private var author: Staff?
 
     var body: some View {
             NavigationStack {
@@ -53,15 +52,6 @@ struct ComposeEntryView: View {
                         TextField("What's going on?", text: $content, axis: .vertical)
                             .lineLimit(4...8)
                     }
-
-                    Section("Author") {
-                        Picker("Signed as", selection: $author) {
-                            Text("Select staff").tag(Staff?.none)
-                            ForEach(staffMembers) { staff in
-                                Text(staff.name).tag(Staff?.some(staff))
-                            }
-                        }
-                    }
                 }
                 .navigationTitle("New Entry")
                 .toolbar {
@@ -70,7 +60,7 @@ struct ComposeEntryView: View {
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Save") { save() }
-                            .disabled(content.isEmpty || author == nil)
+                            .disabled(content.isEmpty || session.currentStaff == nil)
                     }
                 }
             }
@@ -83,7 +73,7 @@ struct ComposeEntryView: View {
                resident: selectedResident,
                category: category,
                content: content,
-               author: author
+               author: session.currentStaff
            )
            modelContext.insert(entry)
            dismiss()
