@@ -12,6 +12,26 @@ enum EntryCategory: String, Codable, CaseIterable {
     case deathOrPassing
     case facilityNotice
     case other
+
+    var displayName: String {
+        switch self {
+        case .safety: return "Safety"
+        case .carePlanChange: return "Care Plan Change"
+        case .deathOrPassing: return "Death/Passing"
+        case .facilityNotice: return "Facility Notice"
+        case .other: return "Other"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .safety: return "shield.fill"
+        case .carePlanChange: return "heart.text.square.fill"
+        case .deathOrPassing: return "leaf.fill"
+        case .facilityNotice: return "megaphone.fill"
+        case .other: return "circle.fill"
+        }
+    }
 }
 
 enum AlertStatus: String, Codable, CaseIterable {
