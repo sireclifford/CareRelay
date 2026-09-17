@@ -26,6 +26,7 @@ struct CareRelayApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .tint(AppColor.accent)
         }
         .modelContainer(sharedModelContainer)
         .environment(session)

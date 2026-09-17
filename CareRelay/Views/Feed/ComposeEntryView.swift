@@ -27,7 +27,7 @@ struct ComposeEntryView: View {
 
                         Picker("Category", selection: $category) {
                             ForEach(EntryCategory.allCases, id: \.self) { category in
-                                Text(category.rawValue.capitalized).tag(category)
+                                Text(category.displayName).tag(category)
                             }
                         }
                     }
