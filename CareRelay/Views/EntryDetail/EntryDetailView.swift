@@ -33,7 +33,7 @@ struct EntryDetailView: View {
                             .foregroundStyle(status == .open ? .red : .secondary)
                     }
                 }
-                Text(entry.category.rawValue.capitalized)
+                Text(entry.category.displayName)
                     .foregroundStyle(.secondary)
             }
             
