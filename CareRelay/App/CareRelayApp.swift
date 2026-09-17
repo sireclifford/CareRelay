@@ -3,13 +3,16 @@ import SwiftData
 
 @main
 struct CareRelayApp: App {
+    @State private var session = Session()
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Unit.self,
             Staff.self,
             Resident.self,
             Entry.self,
-            ReadReceipt.self
+            ReadReceipt.self,
+            Comment.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -25,5 +28,6 @@ struct CareRelayApp: App {
             ContentView()
         }
         .modelContainer(sharedModelContainer)
+        .environment(session)
     }
 }
