@@ -3,6 +3,7 @@ import SwiftData
 
 struct RosterView: View {
     @Environment(Session.self) private var session
+    @Environment(\.modelContext) private var modelContext
 
     @Query private var units: [Unit]
     @Query private var staffMembers: [Staff]
@@ -62,6 +63,22 @@ struct RosterView: View {
             }
         }
         .navigationTitle("Roster")
+        #if DEBUG
+        .toolbar {
+            ToolbarItem(placement: .secondaryAction) {
+                Button("Reset & Seed Data", systemImage: "arrow.clockwise") {
+                    session.currentStaff = nil
+                    SeedData.resetAndSeed(context: modelContext)
+                }
+            }
+        }
+        #endif
+    }
+
+    private func initials(for name: String) -> String {
+        let parts = name.split(separator: " ")
+        let letters = parts.prefix(2).compactMap { $0.first }
+        return String(letters).uppercased()
     }
 }
 

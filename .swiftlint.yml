@@ -13,6 +13,7 @@ excluded:
   - Carthage
   - .build
   - DerivedData
+  - CareRelay/App/SeedData.swift
 
 # ==============================================================================
 # Rules Configuration
