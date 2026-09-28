@@ -4,61 +4,85 @@ import SwiftData
 struct EntryDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(Session.self) private var session
-    
+
     let entry: Entry
-    
+
     @State private var newCommentBody: String = ""
-    
+
     private var currentStaff: Staff? {
         session.currentStaff
     }
-    
+
     private var myReadReceipt: ReadReceipt? {
         entry.readReceipts?.first { $0.staff?.id == currentStaff?.id }
     }
-    
+
     private var sortedComments: [Comment] {
         (entry.comments ?? []).sorted { $0.timestamp < $1.timestamp }
     }
-    
+
+    private var trimmedComment: String {
+        newCommentBody.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var headerTint: Color {
+        guard entry.kind == .alert else { return AppColor.accent }
+        return entry.status == .resolved ? AppColor.resolved : AppColor.alertOpen
+    }
+
     var body: some View {
         Form {
             Section {
-                HStack {
-                    Text(entry.kind == .alert ? "Alert" : "Notice")
-                        .font(.headline)
+                HStack(spacing: AppSpacing.medium) {
+                    Circle()
+                        .fill(headerTint.opacity(0.15))
+                        .frame(width: 48, height: 48)
+                        .overlay {
+                            Image(systemName: entry.category.icon)
+                                .foregroundStyle(headerTint)
+                        }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(entry.category.displayName)
+                            .font(.headline)
+                        Text(entry.kind == .alert ? "Alert" : "Notice")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
                     if entry.kind == .alert, let status = entry.status {
-                        Spacer()
-                        Text(status == .open ? "Open" : "Resolved")
-                            .foregroundStyle(status == .open ? .red : .secondary)
+                        StatusBadge(status: status)
                     }
                 }
-                Text(entry.category.displayName)
-                    .foregroundStyle(.secondary)
+                .padding(.vertical, AppSpacing.small / 2)
             }
-            
+
             Section("Where") {
-                Text(entry.unit?.name ?? "Facility-wide")
+                Label(entry.unit?.name ?? "Facility-wide", systemImage: "building.2.fill")
+                    .foregroundStyle(.secondary)
                 if let resident = entry.resident {
-                    Text(resident.name)
+                    Label(resident.name, systemImage: "person.fill")
+                        .foregroundStyle(.secondary)
                 }
             }
-            
+
             Section("Details") {
                 Text(entry.content)
             }
-            
+
             Section("Author") {
-                Text(entry.author?.name ?? "Unknown")
-                Text(entry.createdAt.formatted(date: .abbreviated, time: .shortened))
-                    .foregroundStyle(.secondary)
+                PersonRow(name: entry.author?.name, initials: entry.author?.initials, date: entry.createdAt)
             }
-            
+
             if entry.kind == .alert, entry.status == .open {
                 Section {
                     if let role = currentStaff?.role, role.canResolveAlerts {
-                        Button("Resolve") {
+                        Button {
                             resolve()
+                        } label: {
+                            Label("Mark as resolved", systemImage: "checkmark.circle")
                         }
                     } else {
                         Text("Only a nurse in charge or supervisor can resolve this.")
@@ -66,71 +90,144 @@ struct EntryDetailView: View {
                     }
                 }
             }
-            
+
             if entry.kind == .alert, entry.status == .resolved,
                let resolvedBy = entry.resolvedBy, let resolvedAt = entry.resolvedAt {
-                Section {
-                    Text("Resolved by \(resolvedBy.name)")
-                    Text(resolvedAt.formatted(date: .abbreviated, time: .shortened))
-                        .foregroundStyle(.secondary)
+                Section("Resolved") {
+                    PersonRow(name: resolvedBy.name, initials: resolvedBy.initials, date: resolvedAt)
                 }
             }
-            
+
             Section("Read") {
                 if let receipt = myReadReceipt {
-                    Text("Signed \(receipt.timestamp.formatted(date: .abbreviated, time: .shortened))")
-                        .foregroundStyle(.secondary)
+                    Label(
+                        "Signed \(receipt.timestamp.formatted(date: .abbreviated, time: .shortened))",
+                        systemImage: "checkmark.seal.fill"
+                    )
+                    .foregroundStyle(AppColor.resolved)
                 } else {
-                    Button("Mark as read") {
+                    Button {
                         markAsRead()
+                    } label: {
+                        Label("Mark as read", systemImage: "checkmark.circle")
                     }
                 }
             }
-            
+
             if entry.kind == .alert {
                 Section("Comments") {
-                    ForEach(sortedComments) { comment in
-                        VStack(alignment: .leading) {
-                            Text(comment.author?.name ?? "Unknown")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                            Text(comment.body)
-                            Text(comment.timestamp.formatted(date: .abbreviated, time: .shortened))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                    if sortedComments.isEmpty {
+                        Text("No comments yet.")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(sortedComments) { comment in
+                            CommentRow(comment: comment)
                         }
                     }
-                    
+
                     HStack {
                         TextField("Add a comment", text: $newCommentBody)
                         Button("Post") {
                             addComment()
                         }
-                        .disabled(newCommentBody.isEmpty)
+                        .disabled(trimmedComment.isEmpty)
                     }
                 }
             }
         }
         .navigationTitle(entry.kind == .alert ? "Alert" : "Notice")
+        .navigationBarTitleDisplayMode(.inline)
     }
-    
+
     private func markAsRead() {
         guard let staff = currentStaff else { return }
         let receipt = ReadReceipt(staff: staff, entry: entry)
         modelContext.insert(receipt)
     }
-    
+
     private func resolve() {
         guard let staff = currentStaff, staff.role.canResolveAlerts else { return }
         entry.status = .resolved
         entry.resolvedBy = staff
         entry.resolvedAt = Date()
     }
-    
+
     private func addComment() {
-        guard let staff = currentStaff, !newCommentBody.isEmpty else { return }
-        let comment = Comment(entry: entry, author: staff, body: newCommentBody)
+        guard let staff = currentStaff, !trimmedComment.isEmpty else { return }
+        let comment = Comment(entry: entry, author: staff, body: trimmedComment)
         modelContext.insert(comment)
         newCommentBody = ""
+    }
+}
+
+private struct StatusBadge: View {
+    let status: AlertStatus
+
+    var body: some View {
+        Text(status == .open ? "Open" : "Resolved")
+            .font(.caption)
+            .fontWeight(.semibold)
+            .foregroundStyle(status == .open ? AppColor.alertOpen : AppColor.resolved)
+            .padding(.horizontal, AppSpacing.small)
+            .padding(.vertical, 4)
+            .background(
+                Capsule().fill((status == .open ? AppColor.alertOpen : AppColor.resolved).opacity(0.15))
+            )
+    }
+}
+
+private struct PersonRow: View {
+    let name: String?
+    let initials: String?
+    let date: Date
+
+    var body: some View {
+        HStack(spacing: AppSpacing.medium) {
+            Circle()
+                .fill(AppColor.accent.opacity(0.15))
+                .frame(width: 36, height: 36)
+                .overlay {
+                    Text(initials ?? "?")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(AppColor.accent)
+                }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(name ?? "Unknown")
+                Text(date.formatted(date: .abbreviated, time: .shortened))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
+private struct CommentRow: View {
+    let comment: Comment
+
+    var body: some View {
+        HStack(alignment: .top, spacing: AppSpacing.medium) {
+            Circle()
+                .fill(AppColor.accent.opacity(0.15))
+                .frame(width: 32, height: 32)
+                .overlay {
+                    Text(comment.author?.initials ?? "?")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(AppColor.accent)
+                }
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(comment.author?.name ?? "Unknown")
+                        .font(.subheadline.weight(.semibold))
+                    Spacer()
+                    Text(comment.timestamp.formatted(date: .abbreviated, time: .shortened))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Text(comment.body)
+            }
+        }
+        .padding(.vertical, AppSpacing.small / 2)
     }
 }
