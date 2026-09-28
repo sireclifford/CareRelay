@@ -83,3 +83,14 @@ final class Entry {
         self.resolvedAt = nil
     }
 }
+
+extension Entry {
+    func readReceipt(for staff: Staff?) -> ReadReceipt? {
+        guard let staff else { return nil }
+        return readReceipts?.first { $0.staff?.id == staff.id }
+    }
+    
+    func isRead(by staff: Staff?) -> Bool {
+        readReceipt(for: staff) != nil
+    }
+}

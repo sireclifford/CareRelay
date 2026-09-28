@@ -14,7 +14,7 @@ struct EntryDetailView: View {
     }
 
     private var myReadReceipt: ReadReceipt? {
-        entry.readReceipts?.first { $0.staff?.id == currentStaff?.id }
+        entry.readReceipt(for: currentStaff)
     }
 
     private var sortedComments: [Comment] {
@@ -90,7 +90,6 @@ struct EntryDetailView: View {
                     }
                 }
             }
-
             if entry.kind == .alert, entry.status == .resolved,
                let resolvedBy = entry.resolvedBy, let resolvedAt = entry.resolvedAt {
                 Section("Resolved") {
