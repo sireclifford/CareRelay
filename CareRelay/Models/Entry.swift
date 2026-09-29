@@ -89,8 +89,16 @@ extension Entry {
         guard let staff else { return nil }
         return readReceipts?.first { $0.staff?.id == staff.id }
     }
-    
+
     func isRead(by staff: Staff?) -> Bool {
         readReceipt(for: staff) != nil
+    }
+
+    var reactionCounts: [(reaction: String, count: Int)] {
+        let reactions = (readReceipts ?? []).compactMap { $0.reaction }
+        let grouped = Dictionary(grouping: reactions, by: { $0 })
+        return grouped
+            .map { (reaction: $0.key, count: $0.value.count) }
+            .sorted { $0.reaction < $1.reaction }
     }
 }
