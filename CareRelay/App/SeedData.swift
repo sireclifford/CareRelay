@@ -15,13 +15,14 @@ enum SeedData {
         let redwood = Unit(name: "Redwood")
         [cedar, manor, redwood].forEach { context.insert($0) }
 
-        let alvin = Staff(name: "Alvin Mensah", role: .caregiver)
-        let esther = Staff(name: "Esther Okafor", role: .nurseInCharge)
-        let jessica = Staff(name: "Jessica Tremblay", role: .supervisor)
-        let kaylee = Staff(name: "Kaylee Bishop", role: .nurseInCharge)
-        let laurence = Staff(name: "Laurence Adeyemi", role: .caregiver)
-        let shawna = Staff(name: "Shawna Whitehorse", role: .supervisor)
-        [alvin, esther, jessica, kaylee, laurence, shawna].forEach { context.insert($0) }
+        let alvin = Staff(name: "Alvin Mensah", role: .caregiver, idNumber: "1001")
+        let clifford = Staff(name: "Clifford Owusu", role: .caregiver, idNumber: "1002")
+        let esther = Staff(name: "Esther Okafor", role: .nurseInCharge, idNumber: "1003")
+        let jessica = Staff(name: "Jessica Tremblay", role: .supervisor, idNumber: "1004")
+        let kaylee = Staff(name: "Kaylee Bishop", role: .nurseInCharge, idNumber: "1005")
+        let laurence = Staff(name: "Laurence Adeyemi", role: .caregiver, idNumber: "1006")
+        let shawna = Staff(name: "Shawna Whitehorse", role: .supervisor, idNumber: "1007")
+        [alvin, clifford, esther, jessica, kaylee, laurence, shawna].forEach { context.insert($0) }
 
         let angeline = Resident(name: "Angeline Smith", unit: cedar)
         let bernard = Resident(name: "Bernard Cho", unit: cedar)
