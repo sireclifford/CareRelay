@@ -3,8 +3,17 @@ import SwiftData
 
 struct ResidentsListView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(Session.self) private var session
     @Query(sort: \Resident.name) private var residents: [Resident]
     @State private var isPresentingAdd = false
+
+    private var canManage: Bool {
+        session.currentStaff?.role.canManageRoster ?? false
+    }
+
+    private var emptyStateDescription: String {
+        canManage ? "Tap the + button to add your first resident." : "Residents will appear here once added."
+    }
 
     var body: some View {
         Group {
@@ -12,24 +21,32 @@ struct ResidentsListView: View {
                 ContentUnavailableView(
                     "No Residents Yet",
                     systemImage: "bed.double",
-                    description: Text("Tap the + button to add your first resident.")
+                    description: Text(emptyStateDescription)
                 )
-            } else {
+            } else if canManage {
                 List {
                     ForEach(residents) { resident in
                         ResidentRow(resident: resident)
                     }
                     .onDelete(perform: deleteResidents)
                 }
+            } else {
+                List {
+                    ForEach(residents) { resident in
+                        ResidentRow(resident: resident)
+                    }
+                }
             }
         }
         .navigationTitle("Residents")
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    isPresentingAdd = true
-                } label: {
-                    Image(systemName: "plus")
+            if canManage {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        isPresentingAdd = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
                 }
             }
         }
