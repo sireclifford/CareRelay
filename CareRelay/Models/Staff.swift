@@ -2,7 +2,7 @@ enum StaffRole: String, Codable, CaseIterable {
     case caregiver
     case nurseInCharge
     case supervisor
-
+    
     var canResolveAlerts: Bool {
         switch self {
         case .caregiver:
@@ -11,7 +11,16 @@ enum StaffRole: String, Codable, CaseIterable {
             return true
         }
     }
-
+    
+    var canManageRoster: Bool {
+        switch self {
+        case .caregiver, .nurseInCharge:
+            return false
+        case .supervisor:
+            return true
+        }
+    }
+    
     var displayName: String {
         switch self {
         case .caregiver: return "Caregiver"
@@ -30,16 +39,16 @@ final class Staff {
     var name: String = ""
     var role: StaffRole = StaffRole.caregiver
     var idNumber: String = ""
-
+    
     @Relationship(deleteRule: .nullify, inverse: \Entry.author)
     var authoredEntries: [Entry]? = []
-
+    
     @Relationship(deleteRule: .nullify, inverse: \Entry.resolvedBy)
     var resolvedEntries: [Entry]? = []
-
+    
     @Relationship(deleteRule: .nullify, inverse: \ReadReceipt.staff)
     var readReceipts: [ReadReceipt]? = []
-
+    
     @Relationship(deleteRule: .nullify, inverse: \Comment.author)
     var comments: [Comment]? = []
     
@@ -48,7 +57,7 @@ final class Staff {
         let letters = parts.prefix(2).compactMap { $0.first }
         return String(letters).uppercased()
     }
-
+    
     init(id: UUID = UUID(), name: String, role: StaffRole, idNumber: String = "") {
         self.id = id
         self.name = name

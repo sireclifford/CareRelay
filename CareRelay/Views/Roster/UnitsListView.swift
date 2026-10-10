@@ -3,8 +3,17 @@ import SwiftData
 
 struct UnitsListView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(Session.self) private var session
     @Query(sort: \Unit.name) private var units: [Unit]
     @State private var isPresentingAdd = false
+
+    private var canManage: Bool {
+        session.currentStaff?.role.canManageRoster ?? false
+    }
+
+    private var emptyStateDescription: String {
+        canManage ? "Tap the + button to add your first unit." : "Units will appear here once added."
+    }
 
     var body: some View {
         Group {
@@ -12,24 +21,32 @@ struct UnitsListView: View {
                 ContentUnavailableView(
                     "No Units Yet",
                     systemImage: "building.2",
-                    description: Text("Tap the + button to add your first unit.")
+                    description: Text(emptyStateDescription)
                 )
-            } else {
+            } else if canManage {
                 List {
                     ForEach(units) { unit in
                         UnitRow(unit: unit)
                     }
                     .onDelete(perform: deleteUnits)
                 }
+            } else {
+                List {
+                    ForEach(units) { unit in
+                        UnitRow(unit: unit)
+                    }
+                }
             }
         }
         .navigationTitle("Units")
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    isPresentingAdd = true
-                } label: {
-                    Image(systemName: "plus")
+            if canManage {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        isPresentingAdd = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
                 }
             }
         }
