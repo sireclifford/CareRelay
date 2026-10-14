@@ -15,22 +15,31 @@ enum SeedData {
         let redwood = Unit(name: "Redwood")
         [cedar, manor, redwood].forEach { context.insert($0) }
 
-        let alvin = Staff(name: "Alvin Mensah", role: .caregiver, idNumber: "1001")
-        let clifford = Staff(name: "Clifford Owusu", role: .caregiver, idNumber: "1002")
-        let esther = Staff(name: "Esther Okafor", role: .nurseInCharge, idNumber: "1003")
-        let jessica = Staff(name: "Jessica Tremblay", role: .supervisor, idNumber: "1004")
-        let kaylee = Staff(name: "Kaylee Bishop", role: .nurseInCharge, idNumber: "1005")
-        let laurence = Staff(name: "Laurence Adeyemi", role: .caregiver, idNumber: "1006")
-        let shawna = Staff(name: "Shawna Whitehorse", role: .supervisor, idNumber: "1007")
-        [alvin, clifford, esther, jessica, kaylee, laurence, shawna].forEach { context.insert($0) }
+        let marcus = Staff(name: "Marcus Webb", role: .caregiver, idNumber: "1234")
+        let priya = Staff(name: "Priya Sharma", role: .caregiver, idNumber: "1234")
+        let devon = Staff(name: "Devon Walsh", role: .caregiver, idNumber: "1234")
+        let natalie = Staff(name: "Natalie Brooks", role: .caregiver, idNumber: "1234")
+        let samuel = Staff(name: "Samuel Okoye", role: .caregiver, idNumber: "1234")
+        let renata = Staff(name: "Renata Silva", role: .nurseInCharge, idNumber: "1234")
+        let tobias = Staff(name: "Tobias Lindqvist", role: .nurseInCharge, idNumber: "1234")
+        let monica = Staff(name: "Monica Ferreira", role: .nurseInCharge, idNumber: "1234")
+        let daniel = Staff(name: "Daniel Kim", role: .supervisor, idNumber: "1234")
+        let harriet = Staff(name: "Harriet Boone", role: .supervisor, idNumber: "1234")
+        [marcus, priya, devon, natalie, samuel, renata, tobias, monica, daniel, harriet].forEach { context.insert($0) }
 
-        let angeline = Resident(name: "Angeline Smith", unit: cedar)
-        let bernard = Resident(name: "Bernard Cho", unit: cedar)
-        let clara = Resident(name: "Clara Dupont", unit: manor)
-        let derek = Resident(name: "Derek Osei", unit: manor)
-        let ella = Resident(name: "Ella Fontaine", unit: redwood)
-        let felix = Resident(name: "Felix Ngata", unit: redwood)
-        [angeline, bernard, clara, derek, ella, felix].forEach { context.insert($0) }
+        let opal = Resident(name: "Opal Jennings", unit: cedar)
+        let frederick = Resident(name: "Frederick Diallo", unit: cedar)
+        let mabel = Resident(name: "Mabel Reyes", unit: cedar)
+        let theodore = Resident(name: "Theodore Lindgren", unit: cedar)
+        let patricia = Resident(name: "Patricia Kowalski", unit: manor)
+        let victor = Resident(name: "Victor Amadi", unit: manor)
+        let rosalind = Resident(name: "Rosalind Finch", unit: manor)
+        let benedict = Resident(name: "Benedict Petrov", unit: manor)
+        let loretta = Resident(name: "Loretta Humphries", unit: redwood)
+        let gideon = Resident(name: "Gideon Castellanos", unit: redwood)
+        let agnes = Resident(name: "Agnes Whitfield", unit: redwood)
+        let elmer = Resident(name: "Elmer Novak", unit: redwood)
+        [opal, frederick, mabel, theodore, patricia, victor, rosalind, benedict, loretta, gideon, agnes, elmer].forEach { context.insert($0) }
 
         func days(_ n: Double) -> Date { Date().addingTimeInterval(-n * 86_400) }
         func hours(_ n: Double) -> Date { Date().addingTimeInterval(-n * 3_600) }
@@ -39,14 +48,14 @@ enum SeedData {
         let entry1 = Entry(
             kind: .notice,
             unit: cedar,
-            resident: angeline,
+            resident: opal,
             category: .safety,
-            content: "Angeline's bed rail was left down after the 2pm round. Please double check before leaving her room.",
-            author: alvin,
+            content: "Opal's bed rail was left down after the 2pm round. Please double check before leaving her room.",
+            author: marcus,
             createdAt: days(6)
         )
         context.insert(entry1)
-        context.insert(ReadReceipt(staff: esther, entry: entry1, timestamp: days(5)))
+        context.insert(ReadReceipt(staff: renata, entry: entry1, timestamp: days(5)))
 
         // 2: Notice, facility-wide, no resident
         let entry2 = Entry(
@@ -55,7 +64,7 @@ enum SeedData {
             resident: nil,
             category: .facilityNotice,
             content: "Fire drill scheduled for Thursday at 10am. All units should review evacuation routes with residents beforehand.",
-            author: jessica,
+            author: daniel,
             createdAt: days(4)
         )
         context.insert(entry2)
@@ -64,15 +73,15 @@ enum SeedData {
         let entry3 = Entry(
             kind: .notice,
             unit: manor,
-            resident: clara,
+            resident: patricia,
             category: .carePlanChange,
-            content: "Clara's care plan updated — she now requires a mechanical lift for all transfers, not just assisted standing.",
-            author: kaylee,
+            content: "Patricia's care plan updated — she now requires a mechanical lift for all transfers, not just assisted standing.",
+            author: tobias,
             createdAt: days(3)
         )
         context.insert(entry3)
-        context.insert(ReadReceipt(staff: laurence, entry: entry3, timestamp: days(2)))
-        context.insert(ReadReceipt(staff: alvin, entry: entry3, timestamp: days(1)))
+        context.insert(ReadReceipt(staff: natalie, entry: entry3, timestamp: days(2)))
+        context.insert(ReadReceipt(staff: marcus, entry: entry3, timestamp: days(1)))
 
         // 4: Notice, unit-specific, no resident, unread
         let entry4 = Entry(
@@ -81,7 +90,7 @@ enum SeedData {
             resident: nil,
             category: .other,
             content: "New hand sanitizer dispensers installed outside every resident room on Redwood.",
-            author: shawna,
+            author: harriet,
             createdAt: hours(20)
         )
         context.insert(entry4)
@@ -90,10 +99,10 @@ enum SeedData {
         let entry5 = Entry(
             kind: .notice,
             unit: manor,
-            resident: derek,
+            resident: victor,
             category: .deathOrPassing,
-            content: "Derek's family has been notified of his declining condition. Palliative care team is now involved.",
-            author: esther,
+            content: "Victor's family has been notified of his declining condition. Palliative care team is now involved.",
+            author: renata,
             createdAt: hours(10)
         )
         context.insert(entry5)
@@ -102,16 +111,16 @@ enum SeedData {
         let entry6 = Entry(
             kind: .alert,
             unit: cedar,
-            resident: bernard,
+            resident: frederick,
             category: .safety,
-            content: "Bernard had a fall near the bathroom this morning. No visible injury, but he should be monitored closely for the next 24 hours.",
-            author: alvin,
+            content: "Frederick had a fall near the bathroom this morning. No visible injury, but he should be monitored closely for the next 24 hours.",
+            author: priya,
             createdAt: hours(6)
         )
         context.insert(entry6)
-        context.insert(ReadReceipt(staff: esther, entry: entry6, timestamp: hours(5)))
-        context.insert(Comment(entry: entry6, author: esther, body: "Checked at 1pm, resting comfortably. No further symptoms.", timestamp: hours(5)))
-        context.insert(Comment(entry: entry6, author: jessica, body: "Family notified. Will follow up again this evening.", timestamp: hours(2)))
+        context.insert(ReadReceipt(staff: renata, entry: entry6, timestamp: hours(5)))
+        context.insert(Comment(entry: entry6, author: renata, body: "Checked at 1pm, resting comfortably. No further symptoms.", timestamp: hours(5)))
+        context.insert(Comment(entry: entry6, author: daniel, body: "Family notified. Will follow up again this evening.", timestamp: hours(2)))
 
         // 7: Open Alert, facility-wide, no comments yet — tests the empty comment state
         let entry7 = Entry(
@@ -120,7 +129,7 @@ enum SeedData {
             resident: nil,
             category: .carePlanChange,
             content: "Kitchen reports a facility-wide shortage of thickened-liquid supplies. Please ration use until the next delivery.",
-            author: kaylee,
+            author: monica,
             createdAt: hours(3)
         )
         context.insert(entry7)
@@ -129,17 +138,17 @@ enum SeedData {
         let entry8 = Entry(
             kind: .alert,
             unit: redwood,
-            resident: ella,
+            resident: loretta,
             category: .deathOrPassing,
-            content: "Ella passed away peacefully overnight with family present. Please refer new staff to the current end-of-life protocol.",
-            author: shawna,
+            content: "Loretta passed away peacefully overnight with family present. Please refer new staff to the current end-of-life protocol.",
+            author: harriet,
             createdAt: days(2)
         )
         entry8.status = .resolved
-        entry8.resolvedBy = jessica
+        entry8.resolvedBy = daniel
         entry8.resolvedAt = days(1)
         context.insert(entry8)
-        context.insert(Comment(entry: entry8, author: jessica, body: "Family has left the building. Room to be prepared for next admission per protocol.", timestamp: days(1)))
+        context.insert(Comment(entry: entry8, author: daniel, body: "Family has left the building. Room to be prepared for next admission per protocol.", timestamp: days(1)))
 
         // 9: Resolved Alert, facility-wide, no comments
         let entry9 = Entry(
@@ -148,25 +157,129 @@ enum SeedData {
             resident: nil,
             category: .facilityNotice,
             content: "Water main break affected hot water on the east wing for several hours yesterday. Now fully restored.",
-            author: laurence,
+            author: devon,
             createdAt: days(1)
         )
         entry9.status = .resolved
-        entry9.resolvedBy = kaylee
+        entry9.resolvedBy = monica
         entry9.resolvedAt = hours(18)
         context.insert(entry9)
 
-        // 10: Open Alert, completely fresh — the newest, most-untouched item
+        // 10: Open Alert, newest among the original scenario set
         let entry10 = Entry(
             kind: .alert,
             unit: manor,
-            resident: derek,
+            resident: victor,
             category: .other,
-            content: "Derek has been refusing meals for the past two shifts. Needs a care plan review as soon as possible.",
-            author: esther,
+            content: "Victor has been refusing meals for the past two shifts. Needs a care plan review as soon as possible.",
+            author: tobias,
             createdAt: hours(1)
         )
         context.insert(entry10)
+
+        // 11: Notice, unit + resident, safety, read by one staff member
+        let entry11 = Entry(
+            kind: .notice,
+            unit: cedar,
+            resident: mabel,
+            category: .safety,
+            content: "Mabel reported dizziness after breakfast. Vitals checked on the spot and came back stable.",
+            author: samuel,
+            createdAt: days(5)
+        )
+        context.insert(entry11)
+        context.insert(ReadReceipt(staff: renata, entry: entry11, timestamp: days(4)))
+
+        // 12: Notice, care plan change, unread
+        let entry12 = Entry(
+            kind: .notice,
+            unit: manor,
+            resident: rosalind,
+            category: .carePlanChange,
+            content: "Rosalind's physio sessions increased to twice daily per her updated care plan.",
+            author: monica,
+            createdAt: days(4.5)
+        )
+        context.insert(entry12)
+
+        // 13: Notice, unit + resident, other, unread
+        let entry13 = Entry(
+            kind: .notice,
+            unit: redwood,
+            resident: gideon,
+            category: .other,
+            content: "Gideon's family requested extra visiting hours this week for a birthday celebration.",
+            author: natalie,
+            createdAt: days(2.3)
+        )
+        context.insert(entry13)
+
+        // 14: Notice, facility-wide, read by two staff
+        let entry14 = Entry(
+            kind: .notice,
+            unit: nil,
+            resident: nil,
+            category: .facilityNotice,
+            content: "New visitor sign-in sheets are now required at every unit entrance.",
+            author: daniel,
+            createdAt: hours(36)
+        )
+        context.insert(entry14)
+        context.insert(ReadReceipt(staff: samuel, entry: entry14, timestamp: hours(30)))
+        context.insert(ReadReceipt(staff: devon, entry: entry14, timestamp: hours(24)))
+
+        // 15: Open Alert, with a single comment
+        let entry15 = Entry(
+            kind: .alert,
+            unit: cedar,
+            resident: theodore,
+            category: .safety,
+            content: "Theodore attempted to leave through the fire exit unassisted. Door alarm triggered, redirected safely.",
+            author: priya,
+            createdAt: hours(14)
+        )
+        context.insert(entry15)
+        context.insert(Comment(entry: entry15, author: renata, body: "Spoke with Theodore, agitation related to a recent room change. Monitoring closely.", timestamp: hours(12)))
+
+        // 16: Resolved Alert, with a comment left before it closed out
+        let entry16 = Entry(
+            kind: .alert,
+            unit: manor,
+            resident: benedict,
+            category: .carePlanChange,
+            content: "Benedict's swallowing assessment flagged a choking risk. Diet modified to pureed pending follow-up.",
+            author: tobias,
+            createdAt: days(3.5)
+        )
+        entry16.status = .resolved
+        entry16.resolvedBy = harriet
+        entry16.resolvedAt = days(2.5)
+        context.insert(entry16)
+        context.insert(Comment(entry: entry16, author: harriet, body: "Kitchen notified, new diet card posted in Benedict's room.", timestamp: days(2.5)))
+
+        // 17: Notice, unit + resident, other, unread
+        let entry17 = Entry(
+            kind: .notice,
+            unit: redwood,
+            resident: agnes,
+            category: .other,
+            content: "Agnes's family is visiting from out of province this weekend — please accommodate extra chairs in her room.",
+            author: monica,
+            createdAt: hours(9)
+        )
+        context.insert(entry17)
+
+        // 18: Open Alert, facility-wide, completely fresh — the newest, most-untouched item
+        let entry18 = Entry(
+            kind: .alert,
+            unit: nil,
+            resident: nil,
+            category: .safety,
+            content: "Wet floor near the Manor nursing station. Caution signs placed, awaiting maintenance for a permanent fix.",
+            author: devon,
+            createdAt: hours(0.5)
+        )
+        context.insert(entry18)
     }
 
     private static func deleteAll<T: PersistentModel>(_ type: T.Type, in context: ModelContext) {
