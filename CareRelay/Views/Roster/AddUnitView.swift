@@ -17,6 +17,7 @@ struct AddUnitView: View {
                 }
             }
             .navigationTitle("New Unit")
+            .dismissableKeyboard()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }

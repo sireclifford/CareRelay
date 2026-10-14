@@ -29,6 +29,7 @@ struct AddResidentView: View {
                 }
             }
             .navigationTitle("New Resident")
+            .dismissableKeyboard()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
