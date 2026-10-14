@@ -5,6 +5,7 @@ struct ResidentsListView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(Session.self) private var session
     @Query(sort: \Resident.name) private var residents: [Resident]
+    @Query(sort: \Unit.name) private var units: [Unit]
     @State private var isPresentingAdd = false
 
     private var canManage: Bool {
@@ -13,6 +14,18 @@ struct ResidentsListView: View {
 
     private var emptyStateDescription: String {
         canManage ? "Tap the + button to add your first resident." : "Residents will appear here once added."
+    }
+
+    private var residentSections: [(title: String, residents: [Resident])] {
+        var sections: [(title: String, residents: [Resident])] = units.compactMap { unit in
+            let group = residents.filter { $0.unit?.id == unit.id }
+            return group.isEmpty ? nil : (unit.name, group)
+        }
+        let unassigned = residents.filter { $0.unit == nil }
+        if !unassigned.isEmpty {
+            sections.append(("No Unit", unassigned))
+        }
+        return sections
     }
 
     var body: some View {
@@ -25,15 +38,25 @@ struct ResidentsListView: View {
                 )
             } else if canManage {
                 List {
-                    ForEach(residents) { resident in
-                        ResidentRow(resident: resident)
+                    ForEach(residentSections, id: \.title) { section in
+                        Section(section.title) {
+                            ForEach(section.residents) { resident in
+                                ResidentRow(resident: resident)
+                            }
+                            .onDelete { offsets in
+                                deleteResidents(section.residents, at: offsets)
+                            }
+                        }
                     }
-                    .onDelete(perform: deleteResidents)
                 }
             } else {
                 List {
-                    ForEach(residents) { resident in
-                        ResidentRow(resident: resident)
+                    ForEach(residentSections, id: \.title) { section in
+                        Section(section.title) {
+                            ForEach(section.residents) { resident in
+                                ResidentRow(resident: resident)
+                            }
+                        }
                     }
                 }
             }
@@ -55,9 +78,9 @@ struct ResidentsListView: View {
         }
     }
 
-    private func deleteResidents(at offsets: IndexSet) {
+    private func deleteResidents(_ source: [Resident], at offsets: IndexSet) {
         for index in offsets {
-            modelContext.delete(residents[index])
+            modelContext.delete(source[index])
         }
     }
 }
