@@ -64,6 +64,28 @@ struct ComposeEntryView: View {
                 }
 
                 Section {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: AppSpacing.small) {
+                            ForEach(QuickPhrase.phrases(for: category), id: \.self) { phrase in
+                                Button {
+                                    appendPhrase(phrase)
+                                } label: {
+                                    Text(phrase)
+                                        .font(.footnote)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(AppColor.accent.opacity(0.12))
+                                        .foregroundStyle(AppColor.accent)
+                                        .clipShape(Capsule())
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+                    .listRowInsets(EdgeInsets())
+                    .padding(.horizontal)
+
                     TextField("What's going on?", text: $content, axis: .vertical)
                         .lineLimit(4...8)
                 } header: {
@@ -73,6 +95,7 @@ struct ComposeEntryView: View {
                 }
             }
             .navigationTitle("New Entry")
+            .dismissableKeyboard()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -82,6 +105,16 @@ struct ComposeEntryView: View {
                         .disabled(trimmedContent.isEmpty || session.currentStaff == nil)
                 }
             }
+        }
+    }
+
+    private func appendPhrase(_ phrase: String) {
+        if content.isEmpty {
+            content = phrase
+        } else if content.hasSuffix(" ") || content.hasSuffix("\n") {
+            content += phrase
+        } else {
+            content += " " + phrase
         }
     }
 

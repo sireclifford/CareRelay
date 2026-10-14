@@ -26,6 +26,7 @@ struct AddStaffView: View {
                 }
             }
             .navigationTitle("New Staff")
+            .dismissableKeyboard()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
