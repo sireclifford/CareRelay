@@ -8,15 +8,26 @@ struct ComposeEntryView: View {
 
     @Query(sort: \Unit.name) private var units: [Unit]
     @Query(sort: \Resident.name) private var residents: [Resident]
+    @Query(sort: \QuickPhrase.createdAt) private var quickPhrases: [QuickPhrase]
 
     @State private var kind: EntryKind = .notice
     @State private var selectedUnit: Unit?
     @State private var selectedResident: Resident?
     @State private var category: EntryCategory = .other
     @State private var content: String = ""
+    @State private var isAddingPhrase = false
+    @State private var newPhraseText = ""
 
     private var trimmedContent: String {
         content.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var phrasesForCategory: [QuickPhrase] {
+        quickPhrases.filter { $0.category == category }
+    }
+
+    private var canManagePhrases: Bool {
+        session.currentStaff?.role.canManageRoster ?? false
     }
 
     var body: some View {
@@ -66,19 +77,47 @@ struct ComposeEntryView: View {
                 Section {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: AppSpacing.small) {
-                            ForEach(QuickPhrase.phrases(for: category), id: \.self) { phrase in
-                                Button {
-                                    appendPhrase(phrase)
-                                } label: {
-                                    Text(phrase)
-                                        .font(.footnote)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(AppColor.accent.opacity(0.12))
-                                        .foregroundStyle(AppColor.accent)
-                                        .clipShape(Capsule())
+                            Button {
+                                isAddingPhrase = true
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "plus")
+                                    Text("Add")
                                 }
-                                .buttonStyle(.plain)
+                                .font(.footnote)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(.secondary.opacity(0.12))
+                                .foregroundStyle(.secondary)
+                                .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
+
+                            ForEach(phrasesForCategory) { phrase in
+                                HStack(spacing: 4) {
+                                    Button {
+                                        appendPhrase(phrase.text)
+                                    } label: {
+                                        Text(phrase.text)
+                                    }
+                                    .buttonStyle(.plain)
+
+                                    if canManagePhrases {
+                                        Button {
+                                            modelContext.delete(phrase)
+                                        } label: {
+                                            Image(systemName: "xmark.circle.fill")
+                                                .foregroundStyle(.red)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .font(.footnote)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(AppColor.accent.opacity(0.12))
+                                .foregroundStyle(AppColor.accent)
+                                .clipShape(Capsule())
                             }
                         }
                         .padding(.vertical, 2)
@@ -105,6 +144,13 @@ struct ComposeEntryView: View {
                         .disabled(trimmedContent.isEmpty || session.currentStaff == nil)
                 }
             }
+            .alert("New Phrase", isPresented: $isAddingPhrase) {
+                TextField("Phrase", text: $newPhraseText)
+                Button("Add") { addPhrase() }
+                Button("Cancel", role: .cancel) {
+                    newPhraseText = ""
+                }
+            }
         }
     }
 
@@ -116,6 +162,17 @@ struct ComposeEntryView: View {
         } else {
             content += " " + phrase
         }
+    }
+
+    private func addPhrase() {
+        let trimmed = newPhraseText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            newPhraseText = ""
+            return
+        }
+        let phrase = QuickPhrase(text: trimmed, category: category)
+        modelContext.insert(phrase)
+        newPhraseText = ""
     }
 
     private func save() {
