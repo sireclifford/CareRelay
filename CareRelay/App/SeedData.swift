@@ -9,11 +9,53 @@ enum SeedData {
         deleteAll(Resident.self, in: context)
         deleteAll(Staff.self, in: context)
         deleteAll(Unit.self, in: context)
+        deleteAll(QuickPhrase.self, in: context)
 
         let cedar = Unit(name: "Cedar")
         let manor = Unit(name: "Manor")
         let redwood = Unit(name: "Redwood")
         [cedar, manor, redwood].forEach { context.insert($0) }
+
+        let phraseSeeds: [(EntryCategory, [String])] = [
+            (.safety, [
+                "Resident declined assistance",
+                "Found on floor, no visible injury",
+                "Bed rail checked and reset",
+                "Wandered into another resident's room",
+                "Skin check completed, no new concerns"
+            ]),
+            (.carePlanChange, [
+                "Updated mobility status",
+                "New dietary restriction in effect",
+                "Medication time adjusted",
+                "Increased assistance required for transfers",
+                "Family requested care plan review"
+            ]),
+            (.deathOrPassing, [
+                "Resident passed peacefully, family notified",
+                "Palliative care measures in effect",
+                "Funeral home contacted",
+                "Room being prepared for next resident"
+            ]),
+            (.facilityNotice, [
+                "Scheduled fire drill",
+                "Maintenance work in common area",
+                "Staff meeting reminder",
+                "Visitor policy update"
+            ]),
+            (.other, [
+                "Follow up needed",
+                "No concerns to report",
+                "See attached note for details"
+            ])
+        ]
+        var phraseOffset = 0.0
+        for (category, phrases) in phraseSeeds {
+            for text in phrases {
+                context.insert(QuickPhrase(text: text, category: category, createdAt: Date().addingTimeInterval(phraseOffset)))
+                phraseOffset += 1
+            }
+        }
 
         let marcus = Staff(name: "Marcus Webb", role: .caregiver, idNumber: "1234")
         let priya = Staff(name: "Priya Sharma", role: .caregiver, idNumber: "1234")
