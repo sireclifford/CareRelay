@@ -12,11 +12,16 @@ struct SignInView: View {
         NavigationStack {
             Group {
                 if allStaff.isEmpty {
-                    ContentUnavailableView(
-                        "No Staff Found",
-                        systemImage: "person.crop.circle.badge.exclamationmark",
-                        description: Text("Add staff members in Roster before signing in.")
-                    )
+                    ContentUnavailableView {
+                        Label("No Staff Found", systemImage: "person.crop.circle.badge.exclamationmark")
+                    } description: {
+                        Text("Add staff members in Roster, or set up starter data to get going right away.")
+                    } actions: {
+                        Button("Set Up Starter Data") {
+                            SeedData.seedIfEmpty(context: modelContext)
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
                 } else {
                     List {
                         Section {
@@ -88,6 +93,7 @@ struct SignInView: View {
         @Environment(\.dismiss) private var dismiss
         @State private var idInput = ""
         @State private var showsError = false
+        @FocusState private var isIDFieldFocused: Bool
         
         var body: some View {
             NavigationStack {
@@ -95,6 +101,7 @@ struct SignInView: View {
                     Section {
                         TextField("Staff ID number", text: $idInput)
                             .keyboardType(.numberPad)
+                            .focused($isIDFieldFocused)
                     } header: {
                         Text("Enter your staff ID to sign in as \(staff.name).")
                     } footer: {
@@ -124,6 +131,9 @@ struct SignInView: View {
                         }
                         .disabled(idInput.isEmpty)
                     }
+                }
+                .onAppear {
+                    isIDFieldFocused = true
                 }
             }
         }

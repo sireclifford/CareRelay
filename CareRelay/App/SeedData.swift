@@ -11,6 +11,20 @@ enum SeedData {
         deleteAll(Unit.self, in: context)
         deleteAll(QuickPhrase.self, in: context)
 
+        seed(context: context)
+    }
+
+    /// Populates starter data only if the Staff list is genuinely empty.
+    /// Safe to call from a shipped Release build: it never deletes anything,
+    /// so it can't touch real data once any Staff record exists.
+    static func seedIfEmpty(context: ModelContext) {
+        let existingStaff = try? context.fetch(FetchDescriptor<Staff>())
+        guard (existingStaff ?? []).isEmpty else { return }
+
+        seed(context: context)
+    }
+
+    private static func seed(context: ModelContext) {
         let cedar = Unit(name: "Cedar")
         let manor = Unit(name: "Manor")
         let redwood = Unit(name: "Redwood")
