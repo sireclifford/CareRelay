@@ -7,6 +7,19 @@ struct SignInView: View {
     @Query(sort: \Staff.name) private var allStaff: [Staff]
     
     @State private var pendingStaff: Staff?
+    @State private var searchText = ""
+    
+    private var filteredStaff: [Staff] {
+        guard !searchText.isEmpty else {return allStaff}
+        return allStaff.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+    }
+    
+    private var staffByRole: [(role: StaffRole, staff: [Staff])] {
+        StaffRole.allCases.compactMap {role in
+            let matches = filteredStaff.filter { $0.role == role }
+            return matches.isEmpty ? nil : (role, matches)
+        }
+    }
     
     var body: some View {
         NavigationStack {
@@ -24,17 +37,29 @@ struct SignInView: View {
                     }
                 } else {
                     List {
-                        Section {
-                            ForEach(allStaff) { staff in
-                                Button {
-                                    pendingStaff = staff
-                                } label: {
-                                    SignInRow(staff: staff)
+                        ForEach(staffByRole, id: \.role) { group in
+                            Section {
+                                ForEach(group.staff) { staff in
+                                    Button {
+                                        pendingStaff = staff
+                                    } label: {
+                                        SignInRow(staff: staff)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
+                            } header: {
+                                Text(group.role.displayName)
                             }
-                        } header: {
-                            Text("Select your name to sign in for this shift.")
+                        }
+                    }
+                    .searchable(text: $searchText, prompt: "Search staff")
+                    .overlay {
+                        if staffByRole.isEmpty {
+                            ContentUnavailableView(
+                                "No Results",
+                                systemImage: "magnifyingglass",
+                                description: Text("No staff found matching \"\(searchText)\".")
+                            )
                         }
                     }
                 }
