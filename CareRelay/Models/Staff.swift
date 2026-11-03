@@ -39,6 +39,7 @@ final class Staff {
     var name: String = ""
     var role: StaffRole = StaffRole.caregiver
     var idNumber: String = ""
+    var isActive: Bool = true
     
     @Relationship(deleteRule: .nullify, inverse: \Entry.author)
     var authoredEntries: [Entry]? = []
@@ -58,10 +59,11 @@ final class Staff {
         return String(letters).uppercased()
     }
     
-    init(id: UUID = UUID(), name: String, role: StaffRole, idNumber: String = "") {
+    init(id: UUID = UUID(), name: String, role: StaffRole, idNumber: String = "", isActive: Bool = true) {
         self.id = id
         self.name = name
         self.role = role
         self.idNumber = idNumber
+        self.isActive = isActive
     }
 }

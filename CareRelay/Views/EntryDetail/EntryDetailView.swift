@@ -11,9 +11,14 @@ struct EntryDetailView: View {
     
     @State private var newCommentBody: String = ""
     @State private var isShowingReactionPicker = false
+    @State private var isEditingEntry = false
     
     private var currentStaff: Staff? {
         session.currentStaff
+    }
+    
+    private var canManage: Bool {
+        currentStaff?.role.canManageRoster ?? false
     }
     
     private var myReadReceipt: ReadReceipt? {
@@ -97,7 +102,7 @@ struct EntryDetailView: View {
             }
             
             Section("Author") {
-                PersonRow(name: entry.author?.name, initials: entry.author?.initials, date: entry.createdAt)
+                PersonRow(name: entry.displayAuthorName, initials: entry.author?.initials, date: entry.createdAt)
             }
             
             if entry.kind == .alert, entry.status == .open {
@@ -161,6 +166,18 @@ struct EntryDetailView: View {
         }
         .navigationTitle(entry.kind == .alert ? "Alert" : "Notice")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if canManage {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Edit") {
+                        isEditingEntry = true
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $isEditingEntry) {
+            EditEntryView(entry: entry)
+        }
     }
     
     private func markAsRead() {

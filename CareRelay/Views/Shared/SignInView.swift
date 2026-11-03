@@ -9,9 +9,13 @@ struct SignInView: View {
     @State private var pendingStaff: Staff?
     @State private var searchText = ""
     
+    private var activeStaff: [Staff] {
+        allStaff.filter { $0.isActive }
+    }
+    
     private var filteredStaff: [Staff] {
-        guard !searchText.isEmpty else {return allStaff}
-        return allStaff.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        guard !searchText.isEmpty else {return activeStaff}
+        return activeStaff.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
     
     private var staffByRole: [(role: StaffRole, staff: [Staff])] {
@@ -24,7 +28,7 @@ struct SignInView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if allStaff.isEmpty {
+                if activeStaff.isEmpty {
                     ContentUnavailableView {
                         Label("No Staff Found", systemImage: "person.crop.circle.badge.exclamationmark")
                     } description: {

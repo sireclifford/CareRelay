@@ -6,6 +6,7 @@ struct StaffListView: View {
     @Environment(Session.self) private var session
     @Query(sort: \Staff.name) private var staffMembers: [Staff]
     @State private var isPresentingAdd = false
+    @State private var pendingDeactivateStaff: Staff?
 
     private var canManage: Bool {
         session.currentStaff?.role.canManageRoster ?? false
@@ -27,8 +28,23 @@ struct StaffListView: View {
                 List {
                     ForEach(staffMembers) { staff in
                         StaffRow(staff: staff)
+                            .swipeActions(edge: .trailing) {
+                                if staff.isActive {
+                                    Button {
+                                        pendingDeactivateStaff = staff
+                                    } label: {
+                                        Label("Deactivate", systemImage: "person.fill.xmark")
+                                    }
+                                } else {
+                                    Button {
+                                        staff.isActive = true
+                                    } label: {
+                                        Label("Reactivate", systemImage: "person.fill.checkmark")
+                                    }
+                                    .tint(.green)
+                                }
+                            }
                     }
-                    .onDelete(perform: deleteStaff)
                 }
             } else {
                 List {
@@ -53,12 +69,28 @@ struct StaffListView: View {
         .sheet(isPresented: $isPresentingAdd) {
             AddStaffView()
         }
+        .confirmationDialog(
+            "Deactivate this staff member?",
+            isPresented: Binding(
+                get: { pendingDeactivateStaff != nil },
+                set: { if !$0 { pendingDeactivateStaff = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: pendingDeactivateStaff
+        ) { staff in
+            Button("Deactivate \(staff.name)", role: .destructive) {
+                deactivate(staff)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { _ in
+            Text("They'll be hidden from sign-in. Entries they already wrote stay as they are.")
+        }
     }
 
-    private func deleteStaff(at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(staffMembers[index])
-        }
+    private func deactivate(_ staff: Staff) {
+        AuditEvent.log(.staffDeactivated, actor: session.currentStaff, target: staff.name, in: modelContext)
+        staff.isActive = false
+        pendingDeactivateStaff = nil
     }
 }
 
@@ -85,11 +117,16 @@ private struct StaffRow: View {
 
             Spacer()
 
-            if staff.role.canResolveAlerts {
+            if !staff.isActive {
+                Text("Inactive")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            } else if staff.role.canResolveAlerts {
                 Image(systemName: "checkmark.seal.fill")
                     .font(.caption)
                     .foregroundStyle(AppColor.resolved)
             }
         }
+        .opacity(staff.isActive ? 1 : 0.5)
     }
 }
