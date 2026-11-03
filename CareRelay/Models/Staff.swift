@@ -23,7 +23,7 @@ enum StaffRole: String, Codable, CaseIterable {
     
     var displayName: String {
         switch self {
-        case .caregiver: return "Caregiver"
+        case .caregiver: return "Care Aide"
         case .nurseInCharge: return "Nurse in Charge"
         case .supervisor: return "Supervisor"
         }
