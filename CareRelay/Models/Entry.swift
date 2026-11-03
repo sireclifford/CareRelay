@@ -49,6 +49,7 @@ final class Entry {
     var content: String = ""
     var author: Staff?
     var createdAt: Date = Date()
+    var authorName: String = ""
 
     @Relationship(deleteRule: .cascade, inverse: \ReadReceipt.entry)
     var readReceipts: [ReadReceipt]? = []
@@ -68,6 +69,7 @@ final class Entry {
         category: EntryCategory,
         content: String,
         author: Staff?,
+        authorName: String? = nil,
         createdAt: Date = Date()
     ) {
         self.id = id
@@ -77,6 +79,7 @@ final class Entry {
         self.category = category
         self.content = content
         self.author = author
+        self.authorName = authorName ?? author?.name ?? "Unknown"
         self.createdAt = createdAt
         self.status = kind == .alert ? .open : nil
         self.resolvedBy = nil
@@ -100,5 +103,9 @@ extension Entry {
         return grouped
             .map { (reaction: $0.key, count: $0.value.count) }
             .sorted { $0.reaction < $1.reaction }
+    }
+    
+    var displayAuthorName: String {
+        authorName.isEmpty ? (author?.name ?? "Unknown") : authorName
     }
 }

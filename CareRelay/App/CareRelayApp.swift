@@ -13,7 +13,8 @@ struct CareRelayApp: App {
             Entry.self,
             ReadReceipt.self,
             Comment.self,
-            QuickPhrase.self
+            QuickPhrase.self,
+            AuditEvent.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

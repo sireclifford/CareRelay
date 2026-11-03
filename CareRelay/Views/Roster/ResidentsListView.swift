@@ -7,6 +7,8 @@ struct ResidentsListView: View {
     @Query(sort: \Resident.name) private var residents: [Resident]
     @Query(sort: \Unit.name) private var units: [Unit]
     @State private var isPresentingAdd = false
+    @State private var pendingDeleteResident: Resident?
+    @State private var blockedDeleteMessage: String?
 
     private var canManage: Bool {
         session.currentStaff?.role.canManageRoster ?? false
@@ -42,9 +44,13 @@ struct ResidentsListView: View {
                         Section(section.title) {
                             ForEach(section.residents) { resident in
                                 ResidentRow(resident: resident)
-                            }
-                            .onDelete { offsets in
-                                deleteResidents(section.residents, at: offsets)
+                                    .swipeActions(edge: .trailing) {
+                                        Button {
+                                            requestDelete(resident)
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
                             }
                         }
                     }
@@ -76,12 +82,51 @@ struct ResidentsListView: View {
         .sheet(isPresented: $isPresentingAdd) {
             AddResidentView()
         }
+        .confirmationDialog(
+            "Delete this resident?",
+            isPresented: Binding(
+                get: { pendingDeleteResident != nil },
+                set: { if !$0 { pendingDeleteResident = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: pendingDeleteResident
+        ) { resident in
+            Button("Delete \(resident.name)", role: .destructive) {
+                performDelete(resident)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { _ in
+            Text("This can't be undone.")
+        }
+        .alert(
+            "Can't Delete Resident",
+            isPresented: Binding(
+                get: { blockedDeleteMessage != nil },
+                set: { if !$0 { blockedDeleteMessage = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(blockedDeleteMessage ?? "")
+        }
     }
 
-    private func deleteResidents(_ source: [Resident], at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(source[index])
+    private func requestDelete(_ resident: Resident) {
+        let entryCount = resident.entries?.count ?? 0
+        if entryCount > 0 {
+            blockedDeleteMessage = """
+            This resident still has \(entryCount) entr\(entryCount == 1 ? "y" : "ies") \
+            referencing them. Those need to be removed first.
+            """
+            return
         }
+        pendingDeleteResident = resident
+    }
+
+    private func performDelete(_ resident: Resident) {
+        AuditEvent.log(.residentDeleted, actor: session.currentStaff, target: resident.name, in: modelContext)
+        modelContext.delete(resident)
+        pendingDeleteResident = nil
     }
 }
 

@@ -6,6 +6,8 @@ struct UnitsListView: View {
     @Environment(Session.self) private var session
     @Query(sort: \Unit.name) private var units: [Unit]
     @State private var isPresentingAdd = false
+    @State private var pendingDeleteUnit: Unit?
+    @State private var blockedDeleteMessage: String?
 
     private var canManage: Bool {
         session.currentStaff?.role.canManageRoster ?? false
@@ -27,8 +29,14 @@ struct UnitsListView: View {
                 List {
                     ForEach(units) { unit in
                         UnitRow(unit: unit)
+                            .swipeActions(edge: .trailing) {
+                                Button {
+                                    requestDelete(unit)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
                     }
-                    .onDelete(perform: deleteUnits)
                 }
             } else {
                 List {
@@ -53,12 +61,53 @@ struct UnitsListView: View {
         .sheet(isPresented: $isPresentingAdd) {
             AddUnitView()
         }
+        .confirmationDialog(
+            "Delete this unit?",
+            isPresented: Binding(
+                get: { pendingDeleteUnit != nil },
+                set: { if !$0 { pendingDeleteUnit = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: pendingDeleteUnit
+        ) { unit in
+            Button("Delete \(unit.name)", role: .destructive) {
+                performDelete(unit)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { _ in
+            Text("This can't be undone.")
+        }
+        .alert(
+            "Can't Delete Unit",
+            isPresented: Binding(
+                get: { blockedDeleteMessage != nil },
+                set: { if !$0 { blockedDeleteMessage = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(blockedDeleteMessage ?? "")
+        }
     }
 
-    private func deleteUnits(at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(units[index])
+    private func requestDelete(_ unit: Unit) {
+        let residentCount = unit.residents?.count ?? 0
+        let entryCount = unit.entries?.count ?? 0
+        if residentCount > 0 || entryCount > 0 {
+            blockedDeleteMessage = """
+            This unit still has \(residentCount) resident\(residentCount == 1 ? "" : "s") \
+            and \(entryCount) entr\(entryCount == 1 ? "y" : "ies") linked to it. \
+            Move or delete those first.
+            """
+            return
         }
+        pendingDeleteUnit = unit
+    }
+
+    private func performDelete(_ unit: Unit) {
+        AuditEvent.log(.unitDeleted, actor: session.currentStaff, target: unit.name, in: modelContext)
+        modelContext.delete(unit)
+        pendingDeleteUnit = nil
     }
 }
 
