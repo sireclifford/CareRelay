@@ -63,11 +63,16 @@ struct EditEntryView: View {
                 Section {
                     TextField("What's going on?", text: $content, axis: .vertical)
                         .lineLimit(4...8)
+                        .onChange(of: content) { session.recordActivity()
+                        }
                 } header: {
                     Text("Details")
                 }
             }
             .navigationTitle("Edit Entry")
+            .onAppear {
+                session.recordActivity()
+            }
             .dismissableKeyboard()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

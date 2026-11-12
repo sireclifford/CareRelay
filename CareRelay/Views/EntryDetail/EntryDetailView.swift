@@ -156,6 +156,8 @@ struct EntryDetailView: View {
                     
                     HStack {
                         TextField("Add a comment", text: $newCommentBody)
+                            .onChange(of: newCommentBody) { session.recordActivity()
+                            }
                         Button("Post") {
                             addComment()
                         }
@@ -166,6 +168,9 @@ struct EntryDetailView: View {
         }
         .navigationTitle(entry.kind == .alert ? "Alert" : "Notice")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            session.recordActivity()
+        }
         .toolbar {
             if canManage {
                 ToolbarItem(placement: .primaryAction) {

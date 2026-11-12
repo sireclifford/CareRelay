@@ -5,11 +5,11 @@ struct ComposeEntryView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Environment(Session.self) private var session
-
+    
     @Query(sort: \Unit.name) private var units: [Unit]
     @Query(sort: \Resident.name) private var residents: [Resident]
     @Query(sort: \QuickPhrase.createdAt) private var quickPhrases: [QuickPhrase]
-
+    
     @State private var kind: EntryKind = .notice
     @State private var selectedUnit: Unit?
     @State private var selectedResident: Resident?
@@ -17,19 +17,19 @@ struct ComposeEntryView: View {
     @State private var content: String = ""
     @State private var isAddingPhrase = false
     @State private var newPhraseText = ""
-
+    
     private var trimmedContent: String {
         content.trimmingCharacters(in: .whitespacesAndNewlines)
     }
-
+    
     private var phrasesForCategory: [QuickPhrase] {
         quickPhrases.filter { $0.category == category }
     }
-
+    
     private var canManagePhrases: Bool {
         session.currentStaff?.role.canManageRoster ?? false
     }
-
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -39,7 +39,7 @@ struct ComposeEntryView: View {
                         Text("Alert").tag(EntryKind.alert)
                     }
                     .pickerStyle(.segmented)
-
+                    
                     Picker("Category", selection: $category) {
                         ForEach(EntryCategory.allCases, id: \.self) { category in
                             Label(category.displayName, systemImage: category.icon)
@@ -53,7 +53,7 @@ struct ComposeEntryView: View {
                          ? "Alerts are pinned at the top of the feed and stay open until resolved."
                          : "Notices are informational and don't need to be resolved.")
                 }
-
+                
                 Section {
                     Picker("Unit", selection: $selectedUnit) {
                         Text("Facility-wide").tag(Unit?.none)
@@ -61,7 +61,7 @@ struct ComposeEntryView: View {
                             Text(unit.name).tag(Unit?.some(unit))
                         }
                     }
-
+                    
                     Picker("Resident", selection: $selectedResident) {
                         Text("None").tag(Resident?.none)
                         ForEach(residents) { resident in
@@ -73,7 +73,7 @@ struct ComposeEntryView: View {
                 } footer: {
                     Text("Leave Unit as Facility-wide for entries that affect everyone. Resident is optional.")
                 }
-
+                
                 Section {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: AppSpacing.small) {
@@ -92,7 +92,7 @@ struct ComposeEntryView: View {
                                 .clipShape(Capsule())
                             }
                             .buttonStyle(.plain)
-
+                            
                             ForEach(phrasesForCategory) { phrase in
                                 HStack(spacing: 4) {
                                     Button {
@@ -101,7 +101,7 @@ struct ComposeEntryView: View {
                                         Text(phrase.text)
                                     }
                                     .buttonStyle(.plain)
-
+                                    
                                     if canManagePhrases {
                                         Button {
                                             modelContext.delete(phrase)
@@ -124,9 +124,11 @@ struct ComposeEntryView: View {
                     }
                     .listRowInsets(EdgeInsets())
                     .padding(.horizontal)
-
+                    
                     TextField("What's going on?", text: $content, axis: .vertical)
                         .lineLimit(4...8)
+                        .onChange(of: content) { session.recordActivity()
+                        }
                 } header: {
                     Text("Details")
                 } footer: {
@@ -134,6 +136,9 @@ struct ComposeEntryView: View {
                 }
             }
             .navigationTitle("New Entry")
+            .onAppear {
+                session.recordActivity()
+            }
             .dismissableKeyboard()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -153,7 +158,7 @@ struct ComposeEntryView: View {
             }
         }
     }
-
+    
     private func appendPhrase(_ phrase: String) {
         if content.isEmpty {
             content = phrase
@@ -163,7 +168,7 @@ struct ComposeEntryView: View {
             content += " " + phrase
         }
     }
-
+    
     private func addPhrase() {
         let trimmed = newPhraseText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
@@ -174,7 +179,7 @@ struct ComposeEntryView: View {
         modelContext.insert(phrase)
         newPhraseText = ""
     }
-
+    
     private func save() {
         let entry = Entry(
             kind: kind,
